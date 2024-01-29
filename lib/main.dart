@@ -1,25 +1,25 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-
-import 'package:hex/hex.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MyTabView(),
     );
   }
 }
 
 class MyTabView extends StatefulWidget {
+  const MyTabView({super.key});
+
   @override
   _MyTabViewState createState() => _MyTabViewState();
 }
@@ -56,9 +56,9 @@ class _MyTabViewState extends State<MyTabView>
         title: const Text('NFC Read and Write'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            const Tab(text: 'Read'),
-            const Tab(text: 'Write'),
+          tabs: const [
+            Tab(text: 'Read'),
+            Tab(text: 'Write'),
           ],
         ),
       ),
@@ -66,11 +66,7 @@ class _MyTabViewState extends State<MyTabView>
         controller: _tabController,
         children: [
           Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage("assets/image/nfcreadimage.png"),
-                  fit: BoxFit.scaleDown),
-            ),
+            decoration: buildBoxDecoration("assets/image/nfcreadimage.png"),
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(40.0),
@@ -80,24 +76,9 @@ class _MyTabViewState extends State<MyTabView>
                     Column(
                       // mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(
-                          'Text: $text',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                        Text(
-                          'URL: $url',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
-                        Text(
-                          'Phone number: $ph',
-                          style: TextStyle(
-                            fontSize: 20,
-                          ),
-                        ),
+                        buildText('Text: $text'),
+                        buildText('URL: $url'),
+                        buildText('URL: $url'),
                       ],
                     ),
                     Column(
@@ -117,44 +98,13 @@ class _MyTabViewState extends State<MyTabView>
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
-            image: DecorationImage(
-            image: AssetImage("assets/image/nfcwriteimage.png"),
-            fit: BoxFit.scaleDown),
-          ),
+            decoration: buildBoxDecoration('assets/image/nfcwriteimage.png'),
             child: Center(
               child: Column(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: TextField(
-                      controller: text1Controller,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Enter a text',
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                    child: TextField(
-                      controller: text2Controller,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Enter url',
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                    child: TextField(
-                      controller: text3Controller,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Enter phone number',
-                      ),
-                    ),
-                  ),
+                  buildPaddingandText(text1Controller,'Enter a text'),
+                  buildPaddingandText(text2Controller,'Enter a URL'),
+                  buildPaddingandText(text3Controller,'Enter phone number'),
                   Padding(
                     padding: const EdgeInsets.only(top: 200.0),
                     child: ElevatedButton(
@@ -174,6 +124,36 @@ class _MyTabViewState extends State<MyTabView>
     );
   }
 
+  BoxDecoration buildBoxDecoration(String path) {
+    return BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(path),
+                fit: BoxFit.scaleDown),
+          );
+  }
+
+  Padding buildPaddingandText(TextEditingController textEditingController, String text) {
+    return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  child: TextField(
+                    controller: textEditingController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: text,
+                    ),
+                  ),
+                );
+  }
+
+  Text buildText(String text) {
+    return Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
+                      );
+  }
+
   void _startNFCReading() async {
     try {
       bool isAvailable = await NfcManager.instance.isAvailable();
@@ -186,7 +166,7 @@ class _MyTabViewState extends State<MyTabView>
             Ndef? ndef = Ndef.from(tag);
 
             if (ndef == null) {
-              print('Tag is not compatible with NDEF');
+              showSnackBar(context,'Tag is not compatible with NDEF');
               return;
             }
             // Process NFC tag, When an NFC tag is discovered, print its data to the console.
@@ -230,9 +210,9 @@ class _MyTabViewState extends State<MyTabView>
               i++;
 
               // Convert ASCII codes to characters
-              String result = String.fromCharCodes(sublist);
+              // String result = String.fromCharCodes(sublist);
               // showSnackBar(context, result);
-              print(result);
+              // print(result);
             }
             setState(() {});
             // Convert hexadecimal payload to bytes
@@ -281,60 +261,7 @@ class _MyTabViewState extends State<MyTabView>
       }
     });
   }
-
-// Future<void> nfcCheck() async {
-//   var availability = await FlutterNfcKit.nfcAvailability;
-//   if (availability != NFCAvailability.available) {
-//     log("NFC CHECK not available");
-//   }
-//   else {
-//     log('NFC CHECK available');
-//   }
-//   try {
-//     // timeout only works on Android, while the latter two messages are only for iOS
-//     var tag = await FlutterNfcKit.poll(timeout: Duration(seconds: 10),
-//         iosMultipleTagMessage: "Multiple tags found!",
-//         iosAlertMessage: "Scan your tag");
-//
-//     var ndefAvailable = tag.ndefAvailable;
-//     print('here');
-//     print(tag.type);
-//     NFCTag.type ==
-//     if (tag.type == NFCTagType.mifare_classic){
-//       await FlutterNfcKit.authenticateSector(0, keyA: "FFFFFFFFFFFF");
-//
-//       log("NFC READ inside tag type");
-//        // read one sector, or
-//       var data = await FlutterNfcKit.readBlock(0);
-//       print(data);// read one block
-//     }
-// print(tag.ndefAvailable);
-// if (ndefAvailable != null){
-//   log("NFC CHECK inside first condition");
-//   /// decoded NDEF records (see [ndef.NDEFRecord] for details)
-//   /// `UriRecord: id=(empty) typeNameFormat=TypeNameFormat.nfcWellKnown type=U uri=https://github.com/nfcim/ndef`
-//   for (var record in await FlutterNfcKit.readNDEFRecords(cached: false)) {
-//     print(record.toString());
-//   }
-//
-//   /// raw NDEF records (data in hex string)
-//   /// `{identifier: "", payload: "00010203", type: "0001", typeNameFormat: "nfcWellKnown"}`
-//   for (var record in await FlutterNfcKit.readNDEFRawRecords(
-//       cached: false)) {
-//     print(jsonEncode(record).toString());
-//   }
-// } else {
-//     log("NFC READ else part");
-// }
-
-//
-//   }catch(e){
-//     print(e);
-//   }
-//
-//
-//
-// }
+  
 }
 
 showSnackBar(BuildContext context, String s) {
