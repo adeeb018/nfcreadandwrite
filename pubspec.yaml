@@ -38,6 +38,8 @@ dependencies:
   nfc_manager: ^3.3.0
   hex:
 
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -54,6 +56,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/image/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
