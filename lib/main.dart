@@ -57,8 +57,8 @@ class _MyTabViewState extends State<MyTabView>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            const Tab(text: 'Tab 1'),
-            const Tab(text: 'Tab 2'),
+            const Tab(text: 'Read'),
+            const Tab(text: 'Write'),
           ],
         ),
       ),
@@ -116,50 +116,57 @@ class _MyTabViewState extends State<MyTabView>
               ),
             ),
           ),
-          Center(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: TextField(
-                    controller: text1Controller,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter a text',
+          Container(
+            decoration: const BoxDecoration(
+            image: DecorationImage(
+            image: AssetImage("assets/image/nfcwriteimage.png"),
+            fit: BoxFit.scaleDown),
+          ),
+            child: Center(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: TextField(
+                      controller: text1Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter a text',
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: TextField(
-                    controller: text2Controller,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter url',
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: TextField(
+                      controller: text2Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter url',
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: TextField(
-                    controller: text3Controller,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter phone number',
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: TextField(
+                      controller: text3Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter phone number',
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(120.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _ndefWrite(text1Controller.text, text2Controller.text,
-                          text3Controller.text);
-                    },
-                    child: const Text('click to write'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 200.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _ndefWrite(text1Controller.text, text2Controller.text,
+                            text3Controller.text);
+                      },
+                      child: const Text('click to write'),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
