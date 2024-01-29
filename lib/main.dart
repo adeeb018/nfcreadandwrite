@@ -85,29 +85,38 @@ class _MyTabViewState extends State<MyTabView>
               print('Tag is not compatible with NDEF');
               return;
             }
-
             // Process NFC tag, When an NFC tag is discovered, print its data to the console.
             // debugPrint('NFC Tag Detected: ${tag.data}');
-
-            // print(tag.data);
-            // print(tag.data["ndef"]["cachedMessage"]["records"]);
 
             List<Object?> records =
                 tag.data["ndef"]["cachedMessage"]["records"];
 
             int i = 0;
             int j = 3;
+            // print(records);
             for (Object? record in records) {
               print("NFC READ record");
               // record;
-              List<int> asciiCodes =
-                  tag.data["ndef"]["cachedMessage"]["records"][i]["payload"];
+              // here we create a list which can can hold payload data in hex format
+              List<int> asciiCodes = tag.data["ndef"]["cachedMessage"]["records"][i]["payload"];
+              // here sublist is used to delete unwanted hex elements from payload data
+              List<int> sublist;
+              //checking if type format is 1 and index is 0 then we need to remove (,en) from start
+              if(tag.data["ndef"]["cachedMessage"]["records"][i]["typeNameFormat"].toString() == "1" && i == 0){
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+              }
+              // here the j value for url is retrieved by giving j=1
+              else if(i == 1){
+                j=1;
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+              }
+              // others will have to start from 0
+              else{
+                j=0;
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+              }
               i++;
 
-              List<int> sublist =
-                  List.from(asciiCodes.getRange(j, asciiCodes.length));
-              j > 1 ? j = j - 2 : j;
-              // showSnackBar(context, 'device not found on scan, scan again and wait for 5 seconds');
               // Convert ASCII codes to characters
               String result = String.fromCharCodes(sublist);
               // showSnackBar(context, result);
