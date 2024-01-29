@@ -26,13 +26,21 @@ class MyTabView extends StatefulWidget {
 
 class _MyTabViewState extends State<MyTabView>
     with SingleTickerProviderStateMixin {
+  String text = '';
+  String url = '';
+  String ph = '';
+
+  final text1Controller = TextEditingController();
+  final text2Controller = TextEditingController();
+  final text3Controller = TextEditingController();
+
   ValueNotifier<dynamic> result = ValueNotifier(null);
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -45,26 +53,122 @@ class _MyTabViewState extends State<MyTabView>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tab View Example'),
+        title: const Text('NFC Read and Write'),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Tab 1'),
-            Tab(text: 'Tab 2'),
-            Tab(text: 'Tab 3'),
+            const Tab(text: 'Read'),
+            const Tab(text: 'Write'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          Center(child: ElevatedButton(onPressed: () { _startNFCReading(); },
-            child: Text('click here'),
-          ),),
-          Center(child: ElevatedButton(onPressed: () { _ndefWrite(); },
-            child: Text('click here'),
-          ),),
-          Center(child: Text('Content for Tab 3')),
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("assets/image/nfcreadimage.png"),
+                  fit: BoxFit.scaleDown),
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      // mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Text: $text',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(
+                          'URL: $url',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(
+                          'Phone number: $ph',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _startNFCReading();
+                          },
+                          child: const Text('click to Scan'),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            decoration: const BoxDecoration(
+            image: DecorationImage(
+            image: AssetImage("assets/image/nfcwriteimage.png"),
+            fit: BoxFit.scaleDown),
+          ),
+            child: Center(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: TextField(
+                      controller: text1Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter a text',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: TextField(
+                      controller: text2Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter url',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                    child: TextField(
+                      controller: text3Controller,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter phone number',
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 200.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _ndefWrite(text1Controller.text, text2Controller.text,
+                            text3Controller.text);
+                      },
+                      child: const Text('click to write'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -85,34 +189,52 @@ class _MyTabViewState extends State<MyTabView>
               print('Tag is not compatible with NDEF');
               return;
             }
-
             // Process NFC tag, When an NFC tag is discovered, print its data to the console.
             // debugPrint('NFC Tag Detected: ${tag.data}');
-
-            // print(tag.data);
-            // print(tag.data["ndef"]["cachedMessage"]["records"]);
 
             List<Object?> records =
                 tag.data["ndef"]["cachedMessage"]["records"];
 
             int i = 0;
             int j = 3;
+            // print(records);
             for (Object? record in records) {
               print("NFC READ record");
               // record;
+              // here we create a list which can can hold payload data in hex format
               List<int> asciiCodes =
                   tag.data["ndef"]["cachedMessage"]["records"][i]["payload"];
+              // here sublist is used to delete unwanted hex elements from payload data
+              List<int> sublist;
+              //checking if type format is 1 and index is 0 then we need to remove (,en) from start
+              if (tag.data["ndef"]["cachedMessage"]["records"][i]
+                              ["typeNameFormat"]
+                          .toString() ==
+                      "1" &&
+                  i == 0) {
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+                text = String.fromCharCodes(sublist);
+              }
+              // here the j value for url is retrieved by giving j=1
+              else if (i == 1) {
+                j = 1;
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+                url = String.fromCharCodes(sublist);
+              }
+              // others will have to start from 0
+              else {
+                j = 0;
+                sublist = List.from(asciiCodes.getRange(j, asciiCodes.length));
+                ph = String.fromCharCodes(sublist);
+              }
               i++;
 
-              List<int> sublist =
-                  List.from(asciiCodes.getRange(j, asciiCodes.length));
-              j > 1 ? j = j - 2 : j;
-              // showSnackBar(context, 'device not found on scan, scan again and wait for 5 seconds');
               // Convert ASCII codes to characters
               String result = String.fromCharCodes(sublist);
               // showSnackBar(context, result);
               print(result);
             }
+            setState(() {});
             // Convert hexadecimal payload to bytes
             // List<int> asciiCodes = tag.data["ndef"]["cachedMessage"]["records"][0]["payload"];
             // Create a sublist excluding the first 3 element (ASCII 2)
@@ -133,7 +255,7 @@ class _MyTabViewState extends State<MyTabView>
 
 //ndef write
 
-  void _ndefWrite() {
+  void _ndefWrite(String text, String url, String ph) {
     NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
       var ndef = Ndef.from(tag);
       if (ndef == null || !ndef.isWritable) {
@@ -143,12 +265,9 @@ class _MyTabViewState extends State<MyTabView>
       }
 
       NdefMessage message = NdefMessage([
-        NdefRecord.createText('Hello World!'),
-        NdefRecord.createUri(Uri.parse('https://flutter.dev')),
-        NdefRecord.createMime(
-            'text/plain', Uint8List.fromList('Hello'.codeUnits)),
-        NdefRecord.createExternal(
-            'com.example', 'mytype', Uint8List.fromList('mydata'.codeUnits)),
+        NdefRecord.createText(text),
+        NdefRecord.createUri(Uri.parse(url)),
+        NdefRecord.createMime('text/plain', Uint8List.fromList(ph.codeUnits)),
       ]);
 
       try {
@@ -222,7 +341,7 @@ showSnackBar(BuildContext context, String s) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(s),
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     ),
   );
 }
